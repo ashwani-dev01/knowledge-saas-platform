@@ -27,6 +27,7 @@ CREATE TABLE `Article` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `title` VARCHAR(191) NOT NULL,
     `content` LONGTEXT NOT NULL,
+    `summaary` VARCHAR(191) NULL,
     `isPublished` BOOLEAN NOT NULL DEFAULT false,
     `organizationId` INTEGER NOT NULL,
     `authorId` INTEGER NOT NULL,

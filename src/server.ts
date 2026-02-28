@@ -2,7 +2,8 @@ import dotenv from "dotenv";
 import app from "./app";
 import prisma from "./shared/config/prisma";
 
-dotenv.config();
+dotenv.config({ path: "./.env" });
+console.log("ENV KEY:", process.env.OPENROUTER_API_KEY);
 
 const PORT = 8000;
 
