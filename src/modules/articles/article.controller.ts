@@ -3,6 +3,7 @@ import prisma from "../../shared/config/prisma";
 import { AuthRequest } from "../../shared/middleware/auth.middleware";
 import { createArticleSchema } from "../../validators/article.validator";
 import { summarizeText } from "../ai/ai.service";
+import { generateTitle, generateTags } from "../ai/ai.service";
 
 // =====================
 // CREATE ARTICLE
@@ -11,12 +12,25 @@ import { summarizeText } from "../ai/ai.service";
 
 export const createArticle = async (req: AuthRequest, res: Response) => {
   try {
-
     const validatedData = createArticleSchema.parse(req.body);
+
+    let title = validatedData.title ?? "";
+    const { content } = validatedData;
+
+    // Auto-generate title
+    if (!title.trim()) {
+      title = await generateTitle(content);
+    }
+
+    // Generate tags
+    const tags = await generateTags(content);
 
     const article = await prisma.article.create({
       data: {
-        ...validatedData,
+        title,  // now always string
+        content,
+        tags,
+        isPublished: validatedData.isPublished ?? false,
         authorId: req.user.userId,
         organizationId: req.user.organizationId,
       },
@@ -28,9 +42,9 @@ export const createArticle = async (req: AuthRequest, res: Response) => {
     });
 
   } catch (error: any) {
-    return res.status(400).json({
+    res.status(400).json({
       success: false,
-      message: error.errors?.[0]?.message || error.message
+      message: error.errors?.[0]?.message || error.message,
     });
   }
 };
@@ -278,4 +292,3 @@ export const summarizeArticle = async (req: AuthRequest, res: Response) => {
     });
   }
 };
-
