@@ -55,25 +55,62 @@ export const createArticle = async (req: AuthRequest, res: Response) => {
 // =====================
 export const getAllArticles = async (req: AuthRequest, res: Response) => {
   try {
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 10;
+    const search = (req.query.search as string) || "";
+    const published = req.query.published as string;
+    const tag = req.query.tag as string;
 
-    const filter: any = {
-      organizationId: req.user.organizationId
+    const skip = (page - 1) * limit;
+
+    const where: any = {
+      organizationId: req.user.organizationId,
     };
 
     // VIEWER can only see published
     if (req.user.role === "VIEWER") {
-      filter.isPublished = true;
+      where.isPublished = true;
     }
 
-    const articles = await prisma.article.findMany({
-      where: filter,
-      orderBy: {
-        createdAt: "desc"
-      }
-    });
+    // Filter by published
+    if (published === "true") {
+      where.isPublished = true;
+    }
+    if (published === "false") {
+      where.isPublished = false;
+    }
+
+    // Search by title or content
+    if (search) {
+      where.OR = [
+        { title: { contains: search } },
+        { content: { contains: search } },
+      ];
+    }
+
+    // Filter by tag
+    if (tag) {
+      where.tags = { contains: tag };
+    }
+
+    const [articles, total] = await Promise.all([
+      prisma.article.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { createdAt: "desc" },
+      }),
+      prisma.article.count({ where }),
+    ]);
 
     res.status(200).json({
       success: true,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
       data: articles,
     });
 
