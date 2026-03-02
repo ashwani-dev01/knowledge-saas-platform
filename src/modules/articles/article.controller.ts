@@ -11,42 +11,35 @@ import { generateTitle, generateTags } from "../ai/ai.service";
 
 
 export const createArticle = async (req: AuthRequest, res: Response) => {
-  try {
-    const validatedData = createArticleSchema.parse(req.body);
+  const validatedData = createArticleSchema.parse(req.body);
 
-    let title = validatedData.title ?? "";
-    const { content } = validatedData;
+  let { title, content, isPublished } = validatedData;
 
-    // Auto-generate title
-    if (!title.trim()) {
-      title = await generateTitle(content);
-    }
+let finalTitle: string;
 
-    // Generate tags
-    const tags = await generateTags(content);
+if (!title || title.trim() === "") {
+  finalTitle = await generateTitle(content);
+} else {
+  finalTitle = title;
+}
 
-    const article = await prisma.article.create({
-      data: {
-        title,  // now always string
-        content,
-        tags,
-        isPublished: validatedData.isPublished ?? false,
-        authorId: req.user.userId,
-        organizationId: req.user.organizationId,
-      },
-    });
+const tags = await generateTags(content);
 
-    res.status(201).json({
-      success: true,
-      data: article,
-    });
+const article = await prisma.article.create({
+  data: {
+    title: finalTitle,  // ✅ now always string
+    content,
+    tags,
+    isPublished: isPublished ?? false,
+    authorId: req.user.userId,
+    organizationId: req.user.organizationId,
+  },
+});
 
-  } catch (error: any) {
-    res.status(400).json({
-      success: false,
-      message: error.errors?.[0]?.message || error.message,
-    });
-  }
+  res.status(201).json({
+    success: true,
+    data: article,
+  });
 };
 
 
