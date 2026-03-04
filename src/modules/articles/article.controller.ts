@@ -5,10 +5,8 @@ import { createArticleSchema } from "../../validators/article.validator";
 import { summarizeText } from "../ai/ai.service";
 import { generateTitle, generateTags } from "../ai/ai.service";
 
-// =====================
-// CREATE ARTICLE
-// =====================
 
+// CREATE ARTICLE
 
 export const createArticle = async (req: AuthRequest, res: Response) => {
   const validatedData = createArticleSchema.parse(req.body);
@@ -27,7 +25,7 @@ const tags = await generateTags(content);
 
 const article = await prisma.article.create({
   data: {
-    title: finalTitle,  // ✅ now always string
+    title: finalTitle,  
     content,
     tags,
     isPublished: isPublished ?? false,
@@ -43,9 +41,8 @@ const article = await prisma.article.create({
 };
 
 
-// =====================
 // GET ALL ARTICLES
-// =====================
+
 export const getAllArticles = async (req: AuthRequest, res: Response) => {
   try {
     const page = Number(req.query.page) || 1;
@@ -115,10 +112,8 @@ export const getAllArticles = async (req: AuthRequest, res: Response) => {
   }
 };
 
-
-// =====================
 // GET SINGLE ARTICLE
-// =====================
+
 export const getArticleById = async (req: AuthRequest, res: Response) => {
   try {
 
@@ -157,10 +152,8 @@ export const getArticleById = async (req: AuthRequest, res: Response) => {
   }
 };
 
-
-// =====================
 // UPDATE ARTICLE
-// =====================
+
 export const updateArticle = async (req: AuthRequest, res: Response) => {
   try {
 
@@ -216,10 +209,8 @@ export const updateArticle = async (req: AuthRequest, res: Response) => {
   }
 };
 
-
-// =====================
 // DELETE ARTICLE
-// =====================
+
 export const deleteArticle = async (req: AuthRequest, res: Response) => {
   try {
 
@@ -261,11 +252,8 @@ export const deleteArticle = async (req: AuthRequest, res: Response) => {
     });
   }
 };
-// =====================
+
 // SUMMARIZE ARTICLE (AI)
-// =====================
-
-
 
 export const summarizeArticle = async (req: AuthRequest, res: Response) => {
   try {
