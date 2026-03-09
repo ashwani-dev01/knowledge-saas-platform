@@ -10,12 +10,30 @@ const options = {
       version: "1.0.0",
       description: "API documentation for Knowledge SaaS platform",
     },
+
     servers: [
       {
         url: "http://localhost:8000",
       },
     ],
+
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT",
+        },
+      },
+    },
+
+    security: [
+      {
+        bearerAuth: [],
+      },
+    ],
   },
+
   apis: ["./src/modules/**/*.ts"],
 };
 
